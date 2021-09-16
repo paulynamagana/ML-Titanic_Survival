@@ -11,11 +11,18 @@ knit: (function(input_file, encoding) {
 knitr::opts_chunk$set(echo = TRUE, cache=TRUE)
 ```
 
-## Survival on the Titanic
+# Survival on the Titanic
 
-### Load packages
+## Load packages
 
 ```{r, message=FALSE}
+
+pkgs <- c("ggplot", "dplyr", "randomForest", "skimr", "tidyverse", "scales", "mice")
+
+# Install:
+#install.packages(pkgs)
+
+# Load:
 library("dplyr")
 library("ggplot2") #visualization
 library("randomForest") #predict
@@ -24,11 +31,12 @@ library("tidyverse")
 library("scales") #dollar scale
 library("mice") #predcit
 theme_set(theme_classic())
+
 ```
 
+```{r load, message=FALSE}
 ### Load data
 
-```{r}
 train <- read.csv("train.csv", stringsAsFactors = F, na.strings=c("", "NA"))
 test <- read.csv("test.csv", na.strings=c("", "NA"))
 full<- bind_rows(train,test) #bind training& test data
@@ -36,7 +44,7 @@ full<- bind_rows(train,test) #bind training& test data
 
 ### Take a look at the data
 
-```{r}
+```{r data skim}
 
 skim(full) %>% 
   select(-(numeric.p0:numeric.p100)) %>%
