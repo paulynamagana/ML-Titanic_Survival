@@ -1,5 +1,9 @@
 ---
 title: "Titanic-ML"
+author: Paulyna Magana
+output:
+  rmarkdown::html_document:
+    toc: true
 knit: (function(input_file, encoding) {
   out_dir <- 'docs';
   rmarkdown::render(input_file,
