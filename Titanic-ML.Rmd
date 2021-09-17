@@ -309,7 +309,7 @@ Let’s compare the results we get with the original distribution of passenger a
 
 ```{r}
 # Plot age distributions
-par(mfrow=c(1,2))
+par(mfrow=c(1,2)) #lets divide the plot in 2
 hist(full$Age, freq=F, main='Age: Original Data', 
   col='darkgreen', ylim=c(0,0.04))
 hist(mice_output$Age, freq=F, main='Age: MICE Output', 
@@ -338,8 +338,8 @@ ggplot(full %>% filter(set=="train") %>% na.omit,
 ```
 
 ```{r}
-# Create the column child, and indicate whether child or adult
-full$AgeGroup[full$Age < 12] <- "Toddler"
+# Create the column AgeGroup, and indicate whether is a Child, Young Adult, Adult or Elder
+full$AgeGroup[full$Age < 12] <- "Child"
 full$AgeGroup[full$Age >= 12 & full$Age < 18] <- "Young"
 full$AgeGroup[full$Age >= 18 & full$Age < 60] <- "Adult"
 full$AgeGroup[full$Age >= 60] <- "Elder"
@@ -348,7 +348,7 @@ full$AgeGroup[full$Age >= 60] <- "Elder"
 kable(table(full$AgeGroup, full$Survived))
 ```
 
-Yeah, looks like being a child won't necessarily save you!
+Yeah, looks like being a toddler won't necessarily save you!
 Maybe we can hope that mothers are more likely to have survived on the Titanic.
 
 ```{r}
@@ -360,25 +360,24 @@ full$Mother <- as.character(full$Mother)
 # Show counts
 kable(table(full$Mother, full$Survived))
 
-# First we'll look at the relationship between age & survival
-ggplot(full %>% filter(set=="train") %>% na.omit, aes(Mother, fill = Survived)) + 
-  geom_bar() 
-
 ```
 
 Lets create a final table to see how many survived
 
 ```{r, message=FALSE}
 #lets get only the data with survivors
-titanic_survivors <- full %>%
+titanic_survivorrate <- full %>%
   filter(!is.na(Survived)) %>%
   group_by(Survived) %>%
   summarise(n=n()) %>%
   mutate(freq = n/sum(n))
 
-  kable(titanic_survivors)
+kable(titanic_survivorrate) #table
+
+#get only survivors
+titanic_onlysurvivors <- titanic_survivorrate$freq[titanic_survivorrate$Survived == "Yes"]
   
-  ggplot(titanic_survivors, aes(Survived, freq))+
+  ggplot(titanic_survivorrate, aes(Survived, freq))+
     geom_col()+
     labs(y="Survival Rate", title="Rate of Survivours") +
     scale_y_continuous(labels = percent)
@@ -388,12 +387,15 @@ Yeah, a tragedy!
 
 ## Data Visualisation! {.tabset .tabset-fade}
 
+Go through each tab to visualise different variables and see the relationship to survival rate
+
 ### Pclass 
 ```{r rate_pclass, message=FALSE, warning=FALSE, echo=TRUE, fig.height=4.5, fig.width=9}
 ggplot(full %>% filter(set=="train") %>% na.omit,
        aes(Pclass, fill=Survived)) +
   geom_bar(position="fill") +
   scale_y_continuous(labels = percent) +
+  geom_hline(yintercept=titanic_onlysurvivors, col="white", lty=2, size=2)+
   labs(y="Survival Rate", title="Survival Rate by Class") +
   scale_x_discrete(labels= c("1st", "2nd", "3rd")) 
 
@@ -406,6 +408,23 @@ ggplot(full %>% filter(set=="train") %>% na.omit,
   geom_histogram(aes(y=..count..), alpha=0.5) +
   labs(y="Density", title="Survival by Age") 
 ```
+### Age Group 
+```{r age group plot, message=FALSE, warning=FALSE, echo=TRUE, fig.height=4.5, fig.width=9}
+ggplot(full %>% filter(set=="train") %>% na.omit,
+       aes(AgeGroup, fill=Survived)) +
+  geom_bar(position="fill") +
+  scale_y_continuous(labels=percent) +
+  geom_hline(yintercept=titanic_onlysurvivors, col="white", lty=2, size=2)+
+  labs(y="Survival Rate", title="Survival by Age") 
+```
+### Mother
+```{r mother plot, message=FALSE}
+# First we'll look at the relationship between age & survival
+ggplot(full %>% filter(set=="train") %>% na.omit, aes(Mother, fill = Survived)) + 
+  geom_bar() +
+  labs(title= "Survival of Mothers")
+```
+
 ### Siblings 
 ```{r siblings, message=FALSE, warning=FALSE, echo=TRUE, fig.height=4.5, fig.width=9}
 ggplot(full %>% filter(set=="train") %>% na.omit,
@@ -447,6 +466,7 @@ ggplot(full %>% filter(set=="train") %>% na.omit,
        aes(Sex, fill=Survived)) +
   geom_bar(position="fill") +
   scale_y_continuous(labels = percent) +
+  geom_hline(yintercept=titanic_onlysurvivors, col="white", lty=2, size=2)+
   labs(y="Survival Rate", title="Survival Rate by Sex")
 
 ```
@@ -458,13 +478,14 @@ ggplot(full %>% filter(set=="train") %>% na.omit,
        aes(Title, fill=Survived)) +
   geom_bar(position="fill") +
   scale_y_continuous(labels = percent) +
+  geom_hline(yintercept=titanic_onlysurvivors, col="white", lty=2, size=2)+
   labs(y="Survival Rate", title="Survival Rate by Title")
 
 ```
 
 ###{-}
 
-### Visulize with mosaicplot
+## Visulize with mosaicplot
 
 A graphical method for visualizing data from qualitative variables.
 
