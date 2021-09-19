@@ -1,6 +1,7 @@
 ---
 title: "Titanic-ML"
-author: Paulyna Magana
+author: "Paulyna Magana"
+date: '`r format(Sys.time(), "Last modified: %d %b %Y")`'
 output:
   rmarkdown::html_document:
     toc: true
